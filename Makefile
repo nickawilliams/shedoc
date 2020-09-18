@@ -1,4 +1,4 @@
-PATH := deps/bin:$(PATH)		# Adds dependency executables to PATH
+PATH := deps/.bin:$(PATH)		# Adds dependency executables to PATH
 SHELL := /bin/bash 				# macOS requires this to export PATH
 
 # Installs dependencies.

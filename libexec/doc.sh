@@ -45,5 +45,5 @@ doc() {
 	return 1
 }
 
-# If this file is being sourced by another script, don't execute the function.
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then doc "$@"; fi
+# Only execute if this file isn't being sourced.
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then deps "$@"; fi
