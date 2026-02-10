@@ -6,7 +6,7 @@ with two additional sigils for structured documentation.
 ## Sigils
 
 | Sigil | Name     | Purpose                                      |
-|-------|----------|----------------------------------------------|
+| ----- | -------- | -------------------------------------------- |
 | `#!/` | Shebang  | Interpreter path (standard)                  |
 | `#?/` | Shedoc   | File metadata (name, version, synopsis)      |
 | `#@/` | Sheblock | Code documentation (functions, entry points) |
@@ -39,44 +39,44 @@ Single-line shedocs need no closing:
 
 File-level metadata for man pages and help output.
 
-| Tag              | Description                          |
-|------------------|--------------------------------------|
-| `#?/name`        | Script name and brief description    |
-| `#?/version`     | Version string                       |
-| `#?/synopsis`    | Usage pattern                        |
-| `#?/description` | Full description (multi-line)        |
-| `#?/examples`    | Usage examples (multi-line)          |
-| `#?/section`     | Man page section (default: 1)        |
-| `#?/author`      | Author name                          |
-| `#?/license`     | License identifier                   |
+| Tag              | Description                       |
+| ---------------- | --------------------------------- |
+| `#?/name`        | Script name and brief description |
+| `#?/version`     | Version string                    |
+| `#?/synopsis`    | Usage pattern                     |
+| `#?/description` | Full description (multi-line)     |
+| `#?/examples`    | Usage examples (multi-line)       |
+| `#?/section`     | Man page section (default: 1)     |
+| `#?/author`      | Author name                       |
+| `#?/license`     | License identifier                |
 
 ## Sheblock Visibility (`#@/`)
 
-| Visibility           | Meaning                                                    |
-|----------------------|------------------------------------------------------------|
-| `#@/entry`           | CLI entry point (function or script)                       |
-| `#@/command <name>`  | Subcommand (function invoked via command name)             |
-| `#@/public`          | Public function, available when sourced                    |
-| `#@/private`         | Internal function, not part of public API                  |
-| `#@/`                | Bare (no visibility) defaults to public                    |
+| Visibility             | Meaning                                        |
+| ---------------------- | ---------------------------------------------- |
+| `#@/command`           | CLI command (function or script)               |
+| `#@/subcommand <name>` | Subcommand (function invoked via command name) |
+| `#@/public`            | Public function, available when sourced        |
+| `#@/private`           | Internal function, not part of public API      |
+| `#@/`                  | Bare (no visibility) defaults to public        |
 
-### Entry Point Behavior
+### Command Behavior
 
-`#@/entry` can document:
+`#@/command` can document:
 
 1. **A function** — when immediately followed by a function declaration
 2. **The script itself** — when standalone (no function follows)
 
 ### Subcommand Behavior
 
-`#@/command <name>` documents a subcommand. The `<name>` is what users type; the
+`#@/subcommand <name>` documents a subcommand. The `<name>` is what users type; the
 function name can be anything. Common flags shared by all subcommands should be
-documented in the `#@/entry` block.
+documented in the `#@/command` block.
 
 ## Input/Output Types
 
-|   I/O  | Name                 | Example                   | Description         |
-|:------:|----------------------|---------------------------|---------------------|
+|  I/O   | Name                 | Example                   | Description         |
+| :----: | -------------------- | ------------------------- | ------------------- |
 | input  | flag (short)         | `cmd -f`                  | boolean argument    |
 | input  | flag (long)          | `cmd --flag-arg`          | boolean argument    |
 | input  | option               | `cmd --named-arg "value"` | named argument      |
@@ -97,45 +97,45 @@ Used within sheblocks to document inputs and outputs.
 
 ### Value Notation
 
-| Syntax           | Meaning                  |
-|------------------|--------------------------|
-| `<name>`         | Required                 |
-| `[name]`         | Optional                 |
-| `[name=default]` | Optional with default    |
-| `<name...>`      | One or more (required)   |
-| `[name...]`      | Zero or more (optional)  |
+| Syntax           | Meaning                 |
+| ---------------- | ----------------------- |
+| `<name>`         | Required                |
+| `[name]`         | Optional                |
+| `[name=default]` | Optional with default   |
+| `<name...>`      | One or more (required)  |
+| `[name...]`      | Zero or more (optional) |
 
 ### Input Tags
 
-| Tag        | Syntax                            | Description                        |
-|------------|-----------------------------------|------------------------------------|
-| `@flag`    | `@flag [s]hort-and-long`          | Boolean flag (`[x]` = short form)  |
-| `@option`  | `@option [f]ormat <value>`        | Option with required value         |
-| `@option`  | `@option [f]ormat [value=json]`   | Option with optional/default value |
-| `@operand` | `@operand <name>`                 | Required positional argument       |
-| `@operand` | `@operand [name]`                 | Optional positional argument       |
-| `@operand` | `@operand [name=default]`         | Optional with default              |
-| `@env`     | `@env VAR_NAME`                   | Environment variable read          |
-| `@reads`   | `@reads <path>`                   | Implicit file read                 |
-| `@stdin`   | `@stdin`                          | Reads from standard input          |
-| `@prompt`  | `@prompt "message"`               | Interactive user prompt            |
+| Tag        | Syntax                           | Description                         |
+| ---------- | -------------------------------- | ----------------------------------- |
+| `@flag`    | `@flag -s \| --long`             | Boolean flag (short, long, or both) |
+| `@option`  | `@option -f \| --format <value>` | Option with required value          |
+| `@option`  | `@option --format [value=json]`  | Option with optional/default value  |
+| `@operand` | `@operand <name>`                | Required positional argument        |
+| `@operand` | `@operand [name]`                | Optional positional argument        |
+| `@operand` | `@operand [name=default]`        | Optional with default               |
+| `@env`     | `@env VAR_NAME`                  | Environment variable read           |
+| `@reads`   | `@reads <path>`                  | Implicit file read                  |
+| `@stdin`   | `@stdin`                         | Reads from standard input           |
+| `@prompt`  | `@prompt "message"`              | Interactive user prompt             |
 
 ### Output Tags
 
-| Tag       | Syntax                            | Description                    |
-|-----------|-----------------------------------|--------------------------------|
-| `@exit`   | `@exit <code> <description>`      | Exit status code               |
-| `@return` | `@return <code> <description>`    | Return status (for functions)  |
-| `@stdout` | `@stdout`                         | Writes to standard output      |
-| `@stderr` | `@stderr`                         | Writes to standard error       |
-| `@sets`   | `@sets VAR_NAME`                  | Environment variable set       |
-| `@writes` | `@writes <path>`                  | Implicit file write            |
+| Tag       | Syntax                         | Description                   |
+| --------- | ------------------------------ | ----------------------------- |
+| `@exit`   | `@exit <code> <description>`   | Exit status code              |
+| `@return` | `@return <code> <description>` | Return status (for functions) |
+| `@stdout` | `@stdout`                      | Writes to standard output     |
+| `@stderr` | `@stderr`                      | Writes to standard error      |
+| `@sets`   | `@sets VAR_NAME`               | Environment variable set      |
+| `@writes` | `@writes <path>`               | Implicit file write           |
 
 ### Metadata Tags
 
-| Tag           | Syntax                            | Description                    |
-|---------------|-----------------------------------|--------------------------------|
-| `@deprecated` | `@deprecated [message]`           | Marks as deprecated            |
+| Tag           | Syntax                  | Description         |
+| ------------- | ----------------------- | ------------------- |
+| `@deprecated` | `@deprecated [message]` | Marks as deprecated |
 
 ## Examples
 
@@ -150,11 +150,11 @@ When a single function is the CLI interface:
 #?/version  1.0.0
 #?/synopsis process-data [-v] [-f format] <file>
 
-#@/entry
+#@/command
  # Processes data from a file or STDIN and outputs the result.
  #
- # @flag    [v]erbose                 Enable verbose output
- # @option  [f]ormat <type>           Output format (json, yaml, xml)
+ # @flag    -v | --verbose            Enable verbose output
+ # @option  -f | --format <type>      Output format (json, yaml, xml)
  # @operand <file>                    Input file to process
  #
  # @env     PROCESS_DATA_API_KEY      API key for processing service
@@ -185,10 +185,10 @@ When the script has inline logic (no wrapper function):
 #?/name    greet
 #?/version 1.0.0
 
-#@/entry
+#@/command
  # Prints a greeting message.
  #
- # @flag    [v]erbose                 Include extra details
+ # @flag    -v | --verbose            Include extra details
  # @operand <name>                    Name to greet
  #
  # @exit    0                         Success
@@ -258,18 +258,18 @@ When a script has multiple subcommands:
 #?/version  1.0.0
 #?/synopsis pkg <command> [options]
 
-#@/entry
+#@/command
  # A simple package manager.
  #
- # @flag    [v]erbose       Enable verbose output (applies to all commands)
+ # @flag    -v | --verbose  Enable verbose output (applies to all commands)
  # @operand <command>       Subcommand to run
  ##
 
-#@/command install
+#@/subcommand install
  # Installs a package.
  #
  # @operand <package>       Package name to install
- # @flag    [f]orce         Overwrite existing installation
+ # @flag    -f | --force    Overwrite existing installation
  # @exit    0               Success
  # @exit    1               Package not found
  ##
@@ -277,11 +277,11 @@ cmd_install() {
     # implementation
 }
 
-#@/command remove
+#@/subcommand remove
  # Removes an installed package.
  #
  # @operand <package>       Package name to remove
- # @flag    [f]orce         Remove without confirmation
+ # @flag    -f | --force    Remove without confirmation
  # @exit    0               Success
  # @exit    1               Package not installed
  ##
@@ -289,10 +289,10 @@ cmd_remove() {
     # implementation
 }
 
-#@/command list
+#@/subcommand list
  # Lists installed packages.
  #
- # @flag    [a]ll           Include system packages
+ # @flag    -a | --all      Include system packages
  # @stdout                  List of packages
  ##
 cmd_list() {
@@ -309,6 +309,6 @@ esac
 
 ## Notes
 
-- A single conceptual input may be provided via multiple forms (e.g., `-v`, `--verbose`, `VERBOSE=1`). The `@flag` syntax `[x]name` captures short and long forms together.
+- A single conceptual input may be provided via multiple forms (e.g., `-v`, `--verbose`, `VERBOSE=1`). The `@flag` syntax supports pipe-separated forms to express this.
 
 - See [ROADMAP.md](ROADMAP.md) for planned features.

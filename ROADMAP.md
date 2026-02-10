@@ -4,6 +4,28 @@ Features under consideration for future versions.
 
 ## v2 Candidates
 
+### Flag Shorthand Syntax
+
+Compact bracket notation for flags where the short form character appears in the long name:
+
+```bash
+# @flag [v]erbose              → -v, --verbose
+# @flag midd[l]e              → -l, --middle
+# @flag las[t]                → -t, --last
+# @flag long-only             → --long-only
+# @flag [s]                   → -s
+```
+
+Rules:
+
+- `[x]` within a name marks the short form character
+- No brackets = long form only
+- Brackets with single char only = short form only
+
+This would complement the universal explicit syntax (`@flag -v | --verbose`) as
+syntactic sugar for the common case where the short flag letter appears in the
+long flag name.
+
 ### Dependencies
 
 Document external command requirements:
