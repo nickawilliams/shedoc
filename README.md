@@ -37,7 +37,8 @@ Single-line shedocs need no closing:
 
 ## Shedoc Tags (`#?/`)
 
-File-level metadata for man pages and help output.
+File-level metadata for man pages and help output. All tags are optional, though tooling
+(e.g., man page generation) may require specific tags.
 
 | Tag              | Description                       |
 | ---------------- | --------------------------------- |
@@ -49,6 +50,8 @@ File-level metadata for man pages and help output.
 | `#?/section`     | Man page section (default: 1)     |
 | `#?/author`      | Author name                       |
 | `#?/license`     | License identifier                |
+
+Any shedoc tag can use the block form for multi-line content.
 
 ## Sheblock Visibility (`#@/`)
 
@@ -66,6 +69,8 @@ File-level metadata for man pages and help output.
 
 1. **A function** — when immediately followed by a function declaration
 2. **The script itself** — when standalone (no function follows)
+
+A file should have at most one `#@/command` block.
 
 ### Subcommand Behavior
 
@@ -95,6 +100,19 @@ documented in the `#@/command` block.
 
 Used within sheblocks to document inputs and outputs.
 
+### Tag Continuation
+
+A tag's description can span multiple lines. Any non-`@`, non-blank line following a
+`@tag` continues that tag's description. A blank comment line (` #`) or the next `@tag`
+terminates the continuation. Leading whitespace on continuation lines is trimmed.
+
+```bash
+ # @option -f | --format <type>   Output format. Supports json, yaml,
+ #                                 and xml with optional pretty-printing.
+ #
+ # @flag -v | --verbose            Enable verbose output
+```
+
 ### Value Notation
 
 | Syntax           | Meaning                 |
@@ -107,29 +125,28 @@ Used within sheblocks to document inputs and outputs.
 
 ### Input Tags
 
-| Tag        | Syntax                           | Description                         |
-| ---------- | -------------------------------- | ----------------------------------- |
-| `@flag`    | `@flag -s \| --long`             | Boolean flag (short, long, or both) |
-| `@option`  | `@option -f \| --format <value>` | Option with required value          |
-| `@option`  | `@option --format [value=json]`  | Option with optional/default value  |
-| `@operand` | `@operand <name>`                | Required positional argument        |
-| `@operand` | `@operand [name]`                | Optional positional argument        |
-| `@operand` | `@operand [name=default]`        | Optional with default               |
-| `@env`     | `@env VAR_NAME`                  | Environment variable read           |
-| `@reads`   | `@reads <path>`                  | Implicit file read                  |
-| `@stdin`   | `@stdin`                         | Reads from standard input           |
-| `@prompt`  | `@prompt "message"`              | Interactive user prompt             |
+| Tag        | Syntax                                         | Description                         |
+| ---------- | ---------------------------------------------- | ----------------------------------- |
+| `@flag`    | `@flag -s \| --long` _description_             | Boolean flag (short, long, or both) |
+| `@option`  | `@option -f \| --format <value>` _description_ | Option with required value          |
+| `@option`  | `@option --format [value=json]` _description_  | Option with optional/default value  |
+| `@operand` | `@operand <name>` _description_                | Required positional argument        |
+| `@operand` | `@operand [name]` _description_                | Optional positional argument        |
+| `@operand` | `@operand [name=default]` _description_        | Optional with default               |
+| `@env`     | `@env VAR_NAME` _description_                  | Environment variable read           |
+| `@reads`   | `@reads <path>` _description_                  | Implicit file read                  |
+| `@stdin`   | `@stdin` _description_                         | Reads from standard input           |
+| `@prompt`  | `@prompt "message"` _description_              | Interactive user prompt             |
 
 ### Output Tags
 
-| Tag       | Syntax                         | Description                   |
-| --------- | ------------------------------ | ----------------------------- |
-| `@exit`   | `@exit <code> <description>`   | Exit status code              |
-| `@return` | `@return <code> <description>` | Return status (for functions) |
-| `@stdout` | `@stdout`                      | Writes to standard output     |
-| `@stderr` | `@stderr`                      | Writes to standard error      |
-| `@sets`   | `@sets VAR_NAME`               | Environment variable set      |
-| `@writes` | `@writes <path>`               | Implicit file write           |
+| Tag       | Syntax                         | Description               |
+| --------- | ------------------------------ | ------------------------- |
+| `@exit`   | `@exit <code>` _description_   | Exit status code          |
+| `@stdout` | `@stdout` _description_        | Writes to standard output |
+| `@stderr` | `@stderr` _description_        | Writes to standard error  |
+| `@sets`   | `@sets VAR_NAME` _description_ | Environment variable set  |
+| `@writes` | `@writes <path>` _description_ | Implicit file write       |
 
 ### Metadata Tags
 
@@ -139,45 +156,124 @@ Used within sheblocks to document inputs and outputs.
 
 ## Examples
 
-### Example 1: Function as Entry Point
+### Comprehensive Example
 
-When a single function is the CLI interface:
+A CLI tool with subcommands, demonstrating most Shedoc features:
 
 ```bash
 #!/usr/bin/env bash
 
-#?/name     process-data
-#?/version  1.0.0
-#?/synopsis process-data [-v] [-f format] <file>
+#?/name     deploy
+#?/version  2.1.0
+#?/synopsis deploy [-v] [-c config] <command> [args...]
+#?/section  1
+#?/author   Jane Developer
+#?/license  MIT
+#?/description
+#? A deployment tool for managing application releases. Supports
+ # multiple environments and rollback capabilities.
+ ##
+#?/examples
+ # deploy status production
+ # deploy push --force staging
+ # echo "v1.2.3" | deploy push production
+ ##
 
 #@/command
- # Processes data from a file or STDIN and outputs the result.
+ # Manages application deployments across environments.
  #
- # @flag    -v | --verbose            Enable verbose output
- # @option  -f | --format <type>      Output format (json, yaml, xml)
- # @operand <file>                    Input file to process
+ # @flag    -v | --verbose          Enable verbose output
+ # @option  -c | --config <path>    Path to configuration file
+ # @operand <command>                Subcommand to run
  #
- # @env     PROCESS_DATA_API_KEY      API key for processing service
- # @reads   ~/.process_datarc         User configuration
- # @stdin                             Reads input if no file provided
+ # @env     DEPLOY_TOKEN             Authentication token for the deployment
+ #                                    service. Can also be provided via the
+ #                                    .deployrc configuration file.
+ # @reads   ~/.deployrc              User configuration
  #
- # @exit    0                         Success
- # @exit    1                         API key not set
- # @exit    2                         User cancelled
- #
- # @stdout                            Processed output
- # @stderr                            Error messages
+ # @exit    0                        Success
+ # @exit    1                        General error
+ # @exit    2                        Authentication failure
+ # @stderr                           Error and diagnostic messages
  ##
-process_data() {
+main() {
+    # top-level flag parsing ...
+
+    case "$1" in
+        push)     shift; cmd_push "$@" ;;
+        status)   shift; cmd_status "$@" ;;
+        rollback) shift; cmd_rollback "$@" ;;
+        migrate)  shift; cmd_migrate "$@" ;;
+        *)        echo "Unknown command: $1" >&2; exit 1 ;;
+    esac
+}
+
+#@/subcommand push
+ # Deploys the application to the specified environment.
+ #
+ # @flag    -f | --force             Skip confirmation prompt
+ # @flag    --dry-run                Preview changes without deploying
+ # @option  --tag [version]          Version tag (default: latest git tag)
+ # @operand <environment>            Target environment (production, staging)
+ # @operand [services...]            Specific services to deploy
+ #
+ # @stdin                            Reads version from STDIN if provided
+ # @prompt  "Continue deploy?"       Confirmation unless --force is set
+ #
+ # @exit    0                        Success
+ # @exit    1                        Deploy failed
+ # @stdout                           Deployment progress
+ # @writes  /var/log/deploy.log      Deployment log
+ ##
+cmd_push() {
     # implementation
 }
 
-process_data "$@"
+#@/subcommand status
+ # Shows the current deployment status for an environment.
+ #
+ # @option  --format [fmt=text]      Output format (text, json, yaml)
+ # @operand <environment>            Target environment
+ #
+ # @exit    0                        Success
+ # @stdout                           Status information
+ ##
+cmd_status() {
+    # implementation
+}
+
+#@/subcommand rollback
+ # Rolls back to the previous deployment.
+ #
+ # @flag    -f | --force             Skip confirmation prompt
+ # @operand <environment>            Target environment
+ # @operand [version]                Specific version to roll back to
+ #
+ # @prompt  "Confirm rollback?"      Confirmation unless --force is set
+ # @sets    DEPLOY_LAST_ROLLBACK     Timestamp of last rollback
+ # @writes  /var/log/deploy.log      Rollback log entry
+ #
+ # @exit    0                        Success
+ # @exit    1                        Rollback failed
+ # @stdout                           Rollback progress
+ ##
+cmd_rollback() {
+    # implementation
+}
+
+#@/subcommand migrate
+ # @deprecated Use 'deploy push --migrate' instead.
+ ##
+cmd_migrate() {
+    # implementation
+}
+
+main "$@"
 ```
 
-### Example 2: Standalone Entry Point
+### Standalone Command
 
-When the script has inline logic (no wrapper function):
+When `#@/command` has no function following it, it documents the script's inline logic:
 
 ```bash
 #!/usr/bin/env bash
@@ -188,27 +284,17 @@ When the script has inline logic (no wrapper function):
 #@/command
  # Prints a greeting message.
  #
- # @flag    -v | --verbose            Include extra details
- # @operand <name>                    Name to greet
- #
+ # @operand [name=World]              Name to greet
  # @exit    0                         Success
  # @stdout                            Greeting message
  ##
 
-verbose=false
-while getopts "v" opt; do
-    case "$opt" in
-        v) verbose=true ;;
-    esac
-done
-shift $((OPTIND - 1))
-
 echo "Hello, ${1:-World}!"
 ```
 
-### Example 3: Library with Public/Private Functions
+### Sourced Library
 
-When the script is meant to be sourced:
+When the script is meant to be sourced, use `#@/public` and `#@/private`:
 
 ```bash
 #!/usr/bin/env bash
@@ -229,16 +315,6 @@ to_upper() {
     echo "${1^^}"
 }
 
-#@/public
- # Converts a string to lowercase.
- #
- # @operand <string>    The string to convert
- # @stdout              Lowercase result
- ##
-to_lower() {
-    echo "${1,,}"
-}
-
 #@/private
  # Internal helper for validation.
  ##
@@ -247,67 +323,9 @@ _validate_input() {
 }
 ```
 
-### Example 4: Script with Subcommands
-
-When a script has multiple subcommands:
-
-```bash
-#!/usr/bin/env bash
-
-#?/name     pkg
-#?/version  1.0.0
-#?/synopsis pkg <command> [options]
-
-#@/command
- # A simple package manager.
- #
- # @flag    -v | --verbose  Enable verbose output (applies to all commands)
- # @operand <command>       Subcommand to run
- ##
-
-#@/subcommand install
- # Installs a package.
- #
- # @operand <package>       Package name to install
- # @flag    -f | --force    Overwrite existing installation
- # @exit    0               Success
- # @exit    1               Package not found
- ##
-cmd_install() {
-    # implementation
-}
-
-#@/subcommand remove
- # Removes an installed package.
- #
- # @operand <package>       Package name to remove
- # @flag    -f | --force    Remove without confirmation
- # @exit    0               Success
- # @exit    1               Package not installed
- ##
-cmd_remove() {
-    # implementation
-}
-
-#@/subcommand list
- # Lists installed packages.
- #
- # @flag    -a | --all      Include system packages
- # @stdout                  List of packages
- ##
-cmd_list() {
-    # implementation
-}
-
-case "$1" in
-    install) shift; cmd_install "$@" ;;
-    remove)  shift; cmd_remove "$@" ;;
-    list)    shift; cmd_list "$@" ;;
-    *)       echo "Unknown command: $1" >&2; exit 1 ;;
-esac
-```
-
 ## Notes
+
+- Flags and options support short-only (`-v`), long-only (`--verbose`), or both (`-v | --verbose`).
 
 - A single conceptual input may be provided via multiple forms (e.g., `-v`, `--verbose`, `VERBOSE=1`). The `@flag` syntax supports pipe-separated forms to express this.
 
