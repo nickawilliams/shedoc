@@ -78,24 +78,6 @@ A file should have at most one `#@/command` block.
 function name can be anything. Common flags shared by all subcommands should be
 documented in the `#@/command` block.
 
-## Input/Output Types
-
-|  I/O   | Name                 | Example                   | Description         |
-| :----: | -------------------- | ------------------------- | ------------------- |
-| input  | flag (short)         | `cmd -f`                  | boolean argument    |
-| input  | flag (long)          | `cmd --flag-arg`          | boolean argument    |
-| input  | option               | `cmd --named-arg "value"` | named argument      |
-| input  | operand              | `cmd value`               | positional argument |
-| input  | prompt               | `Enter password:`         |                     |
-| input  | STDIN                | `cmd < data.txt`          |                     |
-| input  | environment variable | `ENV_VAR=value cmd`       |                     |
-| input  | file                 | `~/.cmdrc`                |                     |
-| output | exit code            | `exit 1`                  |                     |
-| output | STDOUT               | `echo "output"`           |                     |
-| output | STDERR               | `echo "error" >&2`        |                     |
-| output | environment variable | `export FOO=bar`          |                     |
-| output | file                 | `/var/log/cmd.log`        |                     |
-
 ## Block Tags (`@`)
 
 Used within sheblocks to document inputs and outputs.
@@ -136,7 +118,6 @@ terminates the continuation. Leading whitespace on continuation lines is trimmed
 | `@env`     | `@env VAR_NAME` _description_                  | Environment variable read           |
 | `@reads`   | `@reads <path>` _description_                  | Implicit file read                  |
 | `@stdin`   | `@stdin` _description_                         | Reads from standard input           |
-| `@prompt`  | `@prompt "message"` _description_              | Interactive user prompt             |
 
 ### Output Tags
 
@@ -218,7 +199,6 @@ main() {
  # @operand [services...]            Specific services to deploy
  #
  # @stdin                            Reads version from STDIN if provided
- # @prompt  "Continue deploy?"       Confirmation unless --force is set
  #
  # @exit    0                        Success
  # @exit    1                        Deploy failed
@@ -249,7 +229,6 @@ cmd_status() {
  # @operand <environment>            Target environment
  # @operand [version]                Specific version to roll back to
  #
- # @prompt  "Confirm rollback?"      Confirmation unless --force is set
  # @sets    DEPLOY_LAST_ROLLBACK     Timestamp of last rollback
  # @writes  /var/log/deploy.log      Rollback log entry
  #

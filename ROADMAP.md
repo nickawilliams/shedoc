@@ -125,6 +125,18 @@ Document command/option aliases:
  ##
 ```
 
+### Interactive Prompts
+
+Document interactive user prompts:
+
+```bash
+#@/command
+ # @prompt "Continue deploy?"    Confirmation unless --force is set
+ ##
+```
+
+Useful for automation contexts where knowing a script will block for input is important.
+
 ### Shorthand Patterns
 
 Reduce boilerplate for common input patterns:
