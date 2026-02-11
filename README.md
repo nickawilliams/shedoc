@@ -94,9 +94,9 @@ terminates the continuation. Leading whitespace on continuation lines is trimmed
 
 ```bash
  # @option -f | --format <type>   Output format. Supports json, yaml,
- #                                 and xml with optional pretty-printing.
+ #                                and xml with optional pretty-printing.
  #
- # @flag -v | --verbose            Enable verbose output
+ # @flag -v | --verbose           Enable verbose output
 ```
 
 ### Value Notation
@@ -171,17 +171,17 @@ A CLI tool with subcommands, demonstrating most Shedoc features:
  #
  # @flag    -v | --verbose          Enable verbose output
  # @option  -c | --config <path>    Path to configuration file
- # @operand <command>                Subcommand to run
+ # @operand <command>               Subcommand to run
  #
- # @env     DEPLOY_TOKEN             Authentication token for the deployment
- #                                    service. Can also be provided via the
- #                                    .deployrc configuration file.
- # @reads   ~/.deployrc              User configuration
+ # @env     DEPLOY_TOKEN            Authentication token for the deployment
+ #                                  service. Can also be provided via the
+ #                                  .deployrc configuration file.
+ # @reads   ~/.deployrc             User configuration
  #
- # @exit    0                        Success
- # @exit    1                        General error
- # @exit    2                        Authentication failure
- # @stderr                           Error and diagnostic messages
+ # @exit    0                       Success
+ # @exit    1                       General error
+ # @exit    2                       Authentication failure
+ # @stderr                          Error and diagnostic messages
  ##
 main() {
     # top-level flag parsing ...
