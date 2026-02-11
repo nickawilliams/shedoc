@@ -1,10 +1,12 @@
 # Shedoc Roadmap
 
-Features under consideration for future versions.
+## Specification
 
-## v2 Candidates
+Features under consideration for future versions of the spec.
 
-### Flag Shorthand Syntax
+### v2 Candidates
+
+#### Flag Shorthand Syntax
 
 Compact bracket notation for flags where the short form character appears in the long name:
 
@@ -26,7 +28,7 @@ This would complement the universal explicit syntax (`@flag -v | --verbose`) as
 syntactic sugar for the common case where the short flag letter appears in the
 long flag name.
 
-### Dependencies
+#### Dependencies
 
 Document external command requirements:
 
@@ -44,7 +46,7 @@ Or at function level:
 
 **Considerations:** Platform differences (GNU vs BSD), version requirements, POSIX variations make this complex. May be informational only.
 
-### Cross-references
+#### Cross-references
 
 Link to other functions or man pages:
 
@@ -55,7 +57,7 @@ Link to other functions or man pages:
  ##
 ```
 
-### Inline Examples
+#### Inline Examples
 
 Function-level `@example` tag:
 
@@ -65,7 +67,7 @@ Function-level `@example` tag:
  ##
 ```
 
-### Mutually Exclusive Options
+#### Mutually Exclusive Options
 
 Indicate options that can't be used together:
 
@@ -78,7 +80,7 @@ Indicate options that can't be used together:
 # @exclusive verbose quiet
 ```
 
-### Multi-value / Repeatable Options
+#### Multi-value / Repeatable Options
 
 Distinguish between:
 
@@ -92,7 +94,7 @@ Possible syntax:
 # @option [i]nclude <pattern>...    Repeatable
 ```
 
-### Variable Documentation
+#### Variable Documentation
 
 Support for documenting global variables and constants:
 
@@ -105,7 +107,7 @@ Support for documenting global variables and constants:
 declare -gr TIMEOUT=30
 ```
 
-### Nested Subcommands
+#### Nested Subcommands
 
 Support for `git remote add` style nested commands:
 
@@ -115,7 +117,7 @@ Support for `git remote add` style nested commands:
 
 Or hierarchical syntax TBD.
 
-### Aliases
+#### Aliases
 
 Document command/option aliases:
 
@@ -125,7 +127,7 @@ Document command/option aliases:
  ##
 ```
 
-### Interactive Prompts
+#### Interactive Prompts
 
 Document interactive user prompts:
 
@@ -137,7 +139,7 @@ Document interactive user prompts:
 
 Useful for automation contexts where knowing a script will block for input is important.
 
-### Shorthand Patterns
+#### Shorthand Patterns
 
 Reduce boilerplate for common input patterns:
 
@@ -151,9 +153,47 @@ Reduce boilerplate for common input patterns:
 
 Expands to `-v | --verbose | SCRIPT_VERBOSE=`.
 
-## Ideas
+## Tooling
 
-- Multi-language documentation support
-- Tooling for generating man pages, markdown, HTML
-- IDE/editor integration (syntax highlighting, linting)
-- Validation tooling (check docs match implementation)
+Tools under consideration to support the Shedoc ecosystem.
+
+### Parser
+
+The foundation for all other tools. Reads shell scripts and extracts Shedoc
+comments into structured data (JSON/AST).
+
+### Shell Completions Generator
+
+Generate bash, zsh, and fish completion scripts from Shedoc. Flags, options,
+subcommands, and operands provide everything needed for completions.
+
+### Help Text Generator
+
+Auto-generate `--help` output from Shedoc comments. Could be a function sourced
+into the script, keeping help text in sync with documentation.
+
+### Man Page Generator
+
+Generate troff/groff man pages from Shedoc. The `#?/` tags map almost directly
+to man page sections.
+
+### Formatter
+
+Auto-format Shedoc comments: column-align tag values and descriptions, normalize
+spacing between groups, and apply consistent continuation line style.
+
+### Linter
+
+Validate Shedoc syntax is well-formed. Could also flag undocumented public
+functions, missing exit codes, or other documentation gaps.
+
+### Drift Detection
+
+Compare Shedoc documentation against the actual implementation. Detect
+discrepancies like documented flags that don't exist, undocumented subcommands,
+or mismatched exit codes.
+
+### Editor Integration
+
+Syntax highlighting for Shedoc comments, tag autocomplete, and snippets for
+VS Code, vim, and other editors.
