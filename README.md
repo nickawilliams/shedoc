@@ -1,7 +1,9 @@
 # Shedoc
 
 Shedoc is a documentation standard for shell scripts, extending the familiar shebang pattern
-with two additional sigils for structured documentation.
+with two additional sigils for structured documentation. It is descriptive, not prescriptive —
+designed to document shell scripts however they happen to be written, without enforcing
+opinions on structure or style.
 
 ## Sigils
 
@@ -70,13 +72,15 @@ Any shedoc tag can use the block form for multi-line content.
 1. **A function** — when immediately followed by a function declaration
 2. **The script itself** — when standalone (no function follows)
 
-A file should have at most one `#@/command` block.
+A file typically has one `#@/command` block.
 
 ### Subcommand Behavior
 
 `#@/subcommand <name>` documents a subcommand. The `<name>` is what users type; the
-function name can be anything. Common flags shared by all subcommands should be
-documented in the `#@/command` block.
+function name can be anything. Common flags shared by all subcommands can be
+documented in the `#@/command` block. When `#@/subcommand` blocks are present, the
+available subcommands can be inferred — an explicit `@operand <command>` in the
+`#@/command` block is optional.
 
 ## Block Tags (`@`)
 
@@ -119,6 +123,8 @@ terminates the continuation. Leading whitespace on continuation lines is trimmed
 | `@reads`   | `@reads <path>` _description_                  | Implicit file read                  |
 | `@stdin`   | `@stdin` _description_                         | Reads from standard input           |
 
+The order of `@operand` tags reflects their positional order.
+
 ### Output Tags
 
 | Tag       | Syntax                         | Description               |
@@ -151,7 +157,7 @@ A CLI tool with subcommands, demonstrating most Shedoc features:
 #?/author   Jane Developer
 #?/license  MIT
 #?/description
-#? A deployment tool for managing application releases. Supports
+ # A deployment tool for managing application releases. Supports
  # multiple environments and rollback capabilities.
  ##
 #?/examples
