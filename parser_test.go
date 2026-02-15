@@ -428,6 +428,221 @@ func TestParseStdinTag(t *testing.T) {
 	}
 }
 
+func TestParseTagContinuationAllTypes(t *testing.T) {
+	input := `#!/bin/bash
+#@/command
+ # Does things.
+ #
+ # @flag -v | --verbose Enable verbose
+ #                      output mode
+ # @option -c | --config <path> Path to
+ #                              config file
+ # @operand <name> The name of
+ #                 the thing
+ # @reads ~/.config Read from
+ #                  config dir
+ # @stdin Reads data
+ #        from pipe
+ # @exit 0 Everything
+ #        went fine
+ # @stdout Outputs the
+ #         result text
+ # @stderr Error and
+ #         diagnostic messages
+ # @sets MY_VAR Sets this
+ #              variable
+ # @writes /tmp/out Writes output
+ #                  to file
+ ##
+`
+	doc := mustParse(t, input)
+	b := doc.Blocks[0]
+
+	if b.Flags[0].Description != "Enable verbose output mode" {
+		t.Errorf("Flag continuation: %q", b.Flags[0].Description)
+	}
+	if b.Options[0].Description != "Path to config file" {
+		t.Errorf("Option continuation: %q", b.Options[0].Description)
+	}
+	if b.Operands[0].Description != "The name of the thing" {
+		t.Errorf("Operand continuation: %q", b.Operands[0].Description)
+	}
+	if b.Reads[0].Description != "Read from config dir" {
+		t.Errorf("Reads continuation: %q", b.Reads[0].Description)
+	}
+	if b.Stdin.Description != "Reads data from pipe" {
+		t.Errorf("Stdin continuation: %q", b.Stdin.Description)
+	}
+	if b.Exit[0].Description != "Everything went fine" {
+		t.Errorf("Exit continuation: %q", b.Exit[0].Description)
+	}
+	if b.Stdout.Description != "Outputs the result text" {
+		t.Errorf("Stdout continuation: %q", b.Stdout.Description)
+	}
+	if b.Stderr.Description != "Error and diagnostic messages" {
+		t.Errorf("Stderr continuation: %q", b.Stderr.Description)
+	}
+	if b.Sets[0].Description != "Sets this variable" {
+		t.Errorf("Sets continuation: %q", b.Sets[0].Description)
+	}
+	if b.Writes[0].Description != "Writes output to file" {
+		t.Errorf("Writes continuation: %q", b.Writes[0].Description)
+	}
+}
+
+func TestParseDeprecatedContinuation(t *testing.T) {
+	input := `#!/bin/bash
+#@/subcommand old
+ # @deprecated This is deprecated.
+ #             Use something else.
+ ##
+`
+	doc := mustParse(t, input)
+	b := doc.Blocks[0]
+	if b.Deprecated == nil {
+		t.Fatal("Deprecated is nil")
+	}
+	if b.Deprecated.Message != "This is deprecated. Use something else." {
+		t.Errorf("Deprecated continuation: %q", b.Deprecated.Message)
+	}
+}
+
+func TestParseShedocBlockEOF(t *testing.T) {
+	// EOF while inside a #?/ block — should finalize gracefully.
+	input := `#!/bin/bash
+#?/description
+ # This description has no closing marker`
+	doc := mustParse(t, input)
+	if doc.Meta.Description != "This description has no closing marker" {
+		t.Errorf("Description = %q", doc.Meta.Description)
+	}
+}
+
+func TestParseSheblockEOF(t *testing.T) {
+	// EOF while inside a #@/ block — should finalize gracefully.
+	input := `#!/bin/bash
+#@/command
+ # A command with no closing marker
+ # @flag -v | --verbose Verbose`
+	doc := mustParse(t, input)
+	if len(doc.Blocks) != 1 {
+		t.Fatalf("got %d blocks, want 1", len(doc.Blocks))
+	}
+	if doc.Blocks[0].Description != "A command with no closing marker" {
+		t.Errorf("Description = %q", doc.Blocks[0].Description)
+	}
+	if len(doc.Blocks[0].Flags) != 1 {
+		t.Fatalf("got %d flags, want 1", len(doc.Blocks[0].Flags))
+	}
+}
+
+func TestParseShedocBlockInterrupted(t *testing.T) {
+	// A non-continuation line inside a #?/ block should finalize and reprocess.
+	input := `#!/bin/bash
+#?/description
+ # Some description
+#?/version 1.0.0
+`
+	doc := mustParse(t, input)
+	if doc.Meta.Description != "Some description" {
+		t.Errorf("Description = %q", doc.Meta.Description)
+	}
+	if doc.Meta.Version != "1.0.0" {
+		t.Errorf("Version = %q", doc.Meta.Version)
+	}
+}
+
+func TestParseSheblockInterrupted(t *testing.T) {
+	// A non-continuation line inside a #@/ block should finalize and reprocess.
+	input := `#!/bin/bash
+#@/public
+ # A function.
+ # @flag -v Verbose
+some_func() { :; }
+`
+	doc := mustParse(t, input)
+	if len(doc.Blocks) != 1 {
+		t.Fatalf("got %d blocks, want 1", len(doc.Blocks))
+	}
+	// Function detected after block was finalized by non-continuation line.
+	if doc.Blocks[0].FunctionName != "some_func" {
+		t.Errorf("FunctionName = %q, want %q", doc.Blocks[0].FunctionName, "some_func")
+	}
+}
+
+func TestParseUnknownVisibility(t *testing.T) {
+	input := `#!/bin/bash
+#@/foobar
+ # Unknown visibility defaults to public.
+ ##
+my_func() { :; }
+`
+	doc := mustParse(t, input)
+	if len(doc.Blocks) != 1 {
+		t.Fatalf("got %d blocks, want 1", len(doc.Blocks))
+	}
+	if doc.Blocks[0].Visibility != VisibilityPublic {
+		t.Errorf("Visibility = %q, want %q", doc.Blocks[0].Visibility, VisibilityPublic)
+	}
+}
+
+func TestParseWarningOnBadTag(t *testing.T) {
+	input := `#!/bin/bash
+#@/command
+ # A command.
+ # @bogustag some value
+ ##
+`
+	doc := mustParse(t, input)
+	if len(doc.Warnings) != 1 {
+		t.Fatalf("got %d warnings, want 1", len(doc.Warnings))
+	}
+	if !strings.Contains(doc.Warnings[0].Message, "bogustag") {
+		t.Errorf("Warning = %q", doc.Warnings[0].Message)
+	}
+}
+
+func TestParseTagWithNoContent(t *testing.T) {
+	// @tag with no following text on the line, just the tag name.
+	input := `#!/bin/bash
+#@/command
+ # @stdout
+ ##
+`
+	doc := mustParse(t, input)
+	if doc.Blocks[0].Stdout == nil {
+		t.Fatal("Stdout is nil")
+	}
+	if doc.Blocks[0].Stdout.Description != "" {
+		t.Errorf("Stdout.Description = %q, want empty", doc.Blocks[0].Stdout.Description)
+	}
+}
+
+func TestParseFileNotFound(t *testing.T) {
+	_, err := Parse("/nonexistent/path/to/script.sh")
+	if err == nil {
+		t.Error("expected error for non-existent file")
+	}
+}
+
+func TestParseTagContinuationNoInitialDescription(t *testing.T) {
+	// Tag with no description on the @tag line, only continuation lines.
+	// This exercises joinDesc with empty existing string.
+	input := `#!/bin/bash
+#@/command
+ # @flag -v
+ #       Verbose output mode
+ ##
+`
+	doc := mustParse(t, input)
+	if len(doc.Blocks[0].Flags) != 1 {
+		t.Fatalf("got %d flags, want 1", len(doc.Blocks[0].Flags))
+	}
+	if doc.Blocks[0].Flags[0].Description != "Verbose output mode" {
+		t.Errorf("Flag.Description = %q, want %q", doc.Blocks[0].Flags[0].Description, "Verbose output mode")
+	}
+}
+
 func mustParse(t *testing.T, input string) *Document {
 	t.Helper()
 	doc, err := ParseReader(strings.NewReader(input))

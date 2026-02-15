@@ -317,6 +317,23 @@ func TestParseReads(t *testing.T) {
 	}
 }
 
+func TestParseReadsNoDescription(t *testing.T) {
+	got, err := parseReads("~/.config", 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.Path != "~/.config" || got.Description != "" {
+		t.Errorf("got %+v", *got)
+	}
+}
+
+func TestParseReadsEmpty(t *testing.T) {
+	_, err := parseReads("", 1)
+	if err == nil {
+		t.Error("expected error for empty input")
+	}
+}
+
 func TestParseWrites(t *testing.T) {
 	got, err := parseWrites("/var/log/deploy.log Deployment log", 10)
 	if err != nil {
@@ -336,6 +353,50 @@ func TestParseSets(t *testing.T) {
 	want := &Sets{Name: "DEPLOY_LAST_ROLLBACK", Description: "Timestamp of last rollback", Line: 15}
 	if *got != *want {
 		t.Errorf("got %+v, want %+v", *got, *want)
+	}
+}
+
+func TestParseSetsNoDescription(t *testing.T) {
+	got, err := parseSets("MY_VAR", 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.Name != "MY_VAR" || got.Description != "" {
+		t.Errorf("got %+v", *got)
+	}
+}
+
+func TestParseSetsEmpty(t *testing.T) {
+	_, err := parseSets("", 1)
+	if err == nil {
+		t.Error("expected error for empty input")
+	}
+}
+
+func TestParseWritesNoDescription(t *testing.T) {
+	got, err := parseWrites("/tmp/out", 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.Path != "/tmp/out" || got.Description != "" {
+		t.Errorf("got %+v", *got)
+	}
+}
+
+func TestParseWritesEmpty(t *testing.T) {
+	_, err := parseWrites("", 1)
+	if err == nil {
+		t.Error("expected error for empty input")
+	}
+}
+
+func TestParseOperandNoDescription(t *testing.T) {
+	got, err := parseOperand("<file>", 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.Value.Name != "file" || got.Description != "" {
+		t.Errorf("got %+v", *got)
 	}
 }
 

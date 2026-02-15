@@ -130,6 +130,80 @@ func TestHelpTextFormatter_LongOnlyFlag(t *testing.T) {
 	}
 }
 
+func TestHelpTextFormatter_ShortOnlyFlagAndOption(t *testing.T) {
+	doc := &shedoc.Document{
+		Blocks: []shedoc.Block{
+			{
+				Visibility: shedoc.VisibilityCommand,
+				Flags: []shedoc.Flag{
+					{Short: "-v", Description: "Verbose"},
+				},
+				Options: []shedoc.Option{
+					{Short: "-o", Value: shedoc.Value{Name: "file", Required: true}, Description: "Output"},
+					{Long: "--format", Value: shedoc.Value{Name: "fmt", Required: true}, Description: "Format"},
+				},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	f := &HelpTextFormatter{}
+	if err := f.Format(&buf, doc); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if !strings.Contains(got, "-v") {
+		t.Errorf("missing short-only flag\n%s", got)
+	}
+	if !strings.Contains(got, "-o <file>") {
+		t.Errorf("missing short-only option\n%s", got)
+	}
+	if !strings.Contains(got, "    --format <fmt>") {
+		t.Errorf("missing long-only option\n%s", got)
+	}
+}
+
+func TestHelpTextFormatter_NoDescription(t *testing.T) {
+	doc := &shedoc.Document{
+		Blocks: []shedoc.Block{
+			{
+				Visibility: shedoc.VisibilityCommand,
+				Flags: []shedoc.Flag{
+					{Short: "-v"},
+				},
+				Options: []shedoc.Option{
+					{Long: "--format", Value: shedoc.Value{Name: "fmt", Required: true}},
+				},
+				Env: []shedoc.Env{
+					{Name: "MY_VAR"},
+				},
+				Exit: []shedoc.Exit{
+					{Code: "0"},
+				},
+			},
+			{
+				Visibility: shedoc.VisibilitySubcommand,
+				Name:       "sub",
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	f := &HelpTextFormatter{}
+	if err := f.Format(&buf, doc); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if !strings.Contains(got, "-v\n") {
+		t.Errorf("flag without description not rendered\n%s", got)
+	}
+	if !strings.Contains(got, "sub\n") {
+		t.Errorf("subcommand without description not rendered\n%s", got)
+	}
+}
+
 func TestFormatValue(t *testing.T) {
 	tests := []struct {
 		name string

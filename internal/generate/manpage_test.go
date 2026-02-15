@@ -116,6 +116,31 @@ func TestManPageFormatter_Minimal(t *testing.T) {
 	}
 }
 
+func TestManPageFormatter_DeprecatedEmptyMessage(t *testing.T) {
+	doc := &shedoc.Document{
+		Meta: shedoc.Meta{Name: "tool"},
+		Blocks: []shedoc.Block{
+			{Visibility: shedoc.VisibilityCommand},
+			{
+				Visibility: shedoc.VisibilitySubcommand,
+				Name:       "old",
+				Deprecated: &shedoc.Deprecated{Message: ""},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	f := &ManPageFormatter{}
+	if err := f.Format(&buf, doc); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if !strings.Contains(got, "This command is deprecated.") {
+		t.Errorf("missing default deprecated message\n%s", got)
+	}
+}
+
 func TestTroffEscape(t *testing.T) {
 	tests := []struct {
 		input string
