@@ -1,0 +1,276 @@
+{
+  "shebang": "/usr/bin/env bash",
+  "meta": {
+    "name": "deploy",
+    "version": "2.1.0",
+    "synopsis": "deploy [-v] [-c config] \u003ccommand\u003e [args...]",
+    "description": "A deployment tool for managing application releases. Supports\nmultiple environments and rollback capabilities.",
+    "examples": "deploy status production\ndeploy push --force staging\necho \"v1.2.3\" | deploy push production",
+    "section": "1",
+    "author": "Jane Developer",
+    "license": "MIT"
+  },
+  "blocks": [
+    {
+      "visibility": "command",
+      "description": "Manages application deployments across environments.",
+      "functionName": "main",
+      "line": 19,
+      "flags": [
+        {
+          "short": "-v",
+          "long": "--verbose",
+          "description": "Enable verbose output",
+          "line": 22
+        }
+      ],
+      "options": [
+        {
+          "short": "-c",
+          "long": "--config",
+          "value": {
+            "name": "path",
+            "required": true
+          },
+          "description": "Path to configuration file",
+          "line": 23
+        }
+      ],
+      "operands": [
+        {
+          "value": {
+            "name": "command",
+            "required": true
+          },
+          "description": "Subcommand to run",
+          "line": 24
+        }
+      ],
+      "env": [
+        {
+          "name": "DEPLOY_TOKEN",
+          "description": "Authentication token for the deployment service. Can also be provided via the .deployrc configuration file.",
+          "line": 26
+        }
+      ],
+      "reads": [
+        {
+          "path": "~/.deployrc",
+          "description": "User configuration",
+          "line": 29
+        }
+      ],
+      "exit": [
+        {
+          "code": "0",
+          "description": "Success",
+          "line": 31
+        },
+        {
+          "code": "1",
+          "description": "General error",
+          "line": 32
+        },
+        {
+          "code": "2",
+          "description": "Authentication failure",
+          "line": 33
+        }
+      ],
+      "stderr": {
+        "description": "Error and diagnostic messages",
+        "line": 34
+      }
+    },
+    {
+      "visibility": "subcommand",
+      "name": "push",
+      "description": "Deploys the application to the specified environment.",
+      "functionName": "cmd_push",
+      "line": 46,
+      "flags": [
+        {
+          "short": "-f",
+          "long": "--force",
+          "description": "Skip confirmation prompt",
+          "line": 49
+        },
+        {
+          "long": "--dry-run",
+          "description": "Preview changes without deploying",
+          "line": 50
+        }
+      ],
+      "options": [
+        {
+          "long": "--tag",
+          "value": {
+            "name": "version",
+            "required": false
+          },
+          "description": "Version tag (default: latest git tag)",
+          "line": 51
+        }
+      ],
+      "operands": [
+        {
+          "value": {
+            "name": "environment",
+            "required": true
+          },
+          "description": "Target environment (production, staging)",
+          "line": 52
+        },
+        {
+          "value": {
+            "name": "services",
+            "required": false,
+            "variadic": true
+          },
+          "description": "Specific services to deploy",
+          "line": 53
+        }
+      ],
+      "stdin": {
+        "description": "Reads version from STDIN if provided",
+        "line": 55
+      },
+      "exit": [
+        {
+          "code": "0",
+          "description": "Success",
+          "line": 57
+        },
+        {
+          "code": "1",
+          "description": "Deploy failed",
+          "line": 58
+        }
+      ],
+      "stdout": {
+        "description": "Deployment progress",
+        "line": 59
+      },
+      "writes": [
+        {
+          "path": "/var/log/deploy.log",
+          "description": "Deployment log",
+          "line": 60
+        }
+      ]
+    },
+    {
+      "visibility": "subcommand",
+      "name": "status",
+      "description": "Shows the current deployment status for an environment.",
+      "functionName": "cmd_status",
+      "line": 66,
+      "options": [
+        {
+          "long": "--format",
+          "value": {
+            "name": "fmt",
+            "required": false,
+            "default": "text"
+          },
+          "description": "Output format (text, json, yaml)",
+          "line": 69
+        }
+      ],
+      "operands": [
+        {
+          "value": {
+            "name": "environment",
+            "required": true
+          },
+          "description": "Target environment",
+          "line": 70
+        }
+      ],
+      "exit": [
+        {
+          "code": "0",
+          "description": "Success",
+          "line": 72
+        }
+      ],
+      "stdout": {
+        "description": "Status information",
+        "line": 73
+      }
+    },
+    {
+      "visibility": "subcommand",
+      "name": "rollback",
+      "description": "Rolls back to the previous deployment.",
+      "functionName": "cmd_rollback",
+      "line": 79,
+      "flags": [
+        {
+          "short": "-f",
+          "long": "--force",
+          "description": "Skip confirmation prompt",
+          "line": 82
+        }
+      ],
+      "operands": [
+        {
+          "value": {
+            "name": "environment",
+            "required": true
+          },
+          "description": "Target environment",
+          "line": 83
+        },
+        {
+          "value": {
+            "name": "version",
+            "required": false
+          },
+          "description": "Specific version to roll back to",
+          "line": 84
+        }
+      ],
+      "exit": [
+        {
+          "code": "0",
+          "description": "Success",
+          "line": 89
+        },
+        {
+          "code": "1",
+          "description": "Rollback failed",
+          "line": 90
+        }
+      ],
+      "stdout": {
+        "description": "Rollback progress",
+        "line": 91
+      },
+      "sets": [
+        {
+          "name": "DEPLOY_LAST_ROLLBACK",
+          "description": "Timestamp of last rollback",
+          "line": 86
+        }
+      ],
+      "writes": [
+        {
+          "path": "/var/log/deploy.log",
+          "description": "Rollback log entry",
+          "line": 87
+        }
+      ]
+    },
+    {
+      "visibility": "subcommand",
+      "name": "migrate",
+      "functionName": "cmd_migrate",
+      "line": 97,
+      "deprecated": {
+        "message": "Use 'deploy push --migrate' instead.",
+        "line": 98
+      }
+    }
+  ]
+}

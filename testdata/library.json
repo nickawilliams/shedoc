@@ -1,0 +1,36 @@
+{
+  "shebang": "/usr/bin/env bash",
+  "meta": {
+    "name": "string-utils",
+    "version": "1.0.0",
+    "description": "A library of string manipulation functions."
+  },
+  "blocks": [
+    {
+      "visibility": "public",
+      "description": "Converts a string to uppercase.",
+      "functionName": "to_upper",
+      "line": 9,
+      "operands": [
+        {
+          "value": {
+            "name": "string",
+            "required": true
+          },
+          "description": "The string to convert",
+          "line": 12
+        }
+      ],
+      "stdout": {
+        "description": "Uppercase result",
+        "line": 13
+      }
+    },
+    {
+      "visibility": "private",
+      "description": "Internal helper for validation.",
+      "functionName": "_validate_input",
+      "line": 19
+    }
+  ]
+}

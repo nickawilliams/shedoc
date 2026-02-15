@@ -1,0 +1,20 @@
+{
+  "shebang": "/bin/bash",
+  "meta": {
+    "name": "edge-cases"
+  },
+  "blocks": [
+    {
+      "visibility": "public",
+      "description": "Bare visibility defaults to public.",
+      "functionName": "bare_func",
+      "line": 5
+    },
+    {
+      "visibility": "public",
+      "description": "A function declared with the function keyword.",
+      "functionName": "keyword_func",
+      "line": 12
+    }
+  ]
+}

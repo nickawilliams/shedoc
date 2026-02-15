@@ -1,0 +1,36 @@
+{
+  "shebang": "/usr/bin/env bash",
+  "meta": {
+    "name": "greet",
+    "version": "1.0.0"
+  },
+  "blocks": [
+    {
+      "visibility": "command",
+      "description": "Prints a greeting message.",
+      "line": 6,
+      "operands": [
+        {
+          "value": {
+            "name": "name",
+            "required": false,
+            "default": "World"
+          },
+          "description": "Name to greet",
+          "line": 9
+        }
+      ],
+      "exit": [
+        {
+          "code": "0",
+          "description": "Success",
+          "line": 10
+        }
+      ],
+      "stdout": {
+        "description": "Greeting message",
+        "line": 11
+      }
+    }
+  ]
+}
