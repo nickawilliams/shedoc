@@ -39,6 +39,8 @@ func NewRootCmd(version string) *cobra.Command {
 
 	cmd.MarkFlagsMutuallyExclusive("to", "get")
 
+	cmd.AddCommand(newCompleteCmd())
+
 	return cmd
 }
 
