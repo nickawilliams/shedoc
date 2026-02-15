@@ -46,7 +46,7 @@ func NewRootCmd(version string) *cobra.Command {
 
 func runRoot(cmd *cobra.Command, args []string) error {
 	// Determine output writer.
-	var w io.Writer = os.Stdout
+	var w io.Writer = cmd.OutOrStdout()
 	if flagOutput != "" {
 		f, err := os.Create(flagOutput)
 		if err != nil {
@@ -70,7 +70,7 @@ func runRoot(cmd *cobra.Command, args []string) error {
 				if source == "" {
 					source = "<stdin>"
 				}
-				fmt.Fprintf(os.Stderr, "%s:%d: warning: %s\n", source, warn.Line, warn.Message)
+				fmt.Fprintf(cmd.ErrOrStderr(), "%s:%d: warning: %s\n", source, warn.Line, warn.Message)
 			}
 		}
 	}

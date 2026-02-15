@@ -47,11 +47,13 @@ func newCompleteCmd() *cobra.Command {
 func runComplete(cmd *cobra.Command, args []string) error {
 	scriptPath := args[0]
 
+	w := cmd.OutOrStdout()
+
 	if flagCompleteSetup != "" {
-		return runCompleteSetup(os.Stdout, scriptPath, flagCompleteSetup)
+		return runCompleteSetup(w, scriptPath, flagCompleteSetup)
 	}
 
-	return runCompleteHandler(os.Stdout, scriptPath, flagCompleteShell)
+	return runCompleteHandler(w, scriptPath, flagCompleteShell)
 }
 
 // runCompleteSetup outputs shell-specific registration code.
