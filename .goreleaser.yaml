@@ -1,0 +1,111 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
+version: 2
+
+project_name: shedoc
+
+metadata:
+  mod_timestamp: "{{ .CommitTimestamp }}"
+
+dist: ./.out/dist
+
+before:
+  hooks:
+    - make prep
+    - make changelog
+    - make man
+    - make completions
+
+builds:
+  - main: ./cmd/shedoc
+    binary: shedoc
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm
+      - arm64
+      - "386"
+    ignore:
+      - goos: windows
+        goarch: arm
+    ldflags:
+      - "-s -w -X main.version={{ .Version }} -X main.commit={{ .Commit }} -X main.date={{ .Date }}"
+    flags:
+      - "-trimpath"
+
+archives:
+  - files:
+      - README.md
+      - LICENSE.md
+      - CHANGELOG.md
+      - contrib/man/shedoc.1
+      - src: contrib/completions/bash/shedoc.bash
+        dst: completions/bash/shedoc.bash
+      - src: contrib/completions/zsh/shedoc.zsh
+        dst: completions/zsh/shedoc.zsh
+      - src: contrib/completions/fish/shedoc.fish
+        dst: completions/fish/shedoc.fish
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}x86
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    wrap_in_directory: true
+
+source:
+  enabled: false
+
+nfpms:
+  - id: linux
+    package_name: "{{ .Env.PKG_BINARY }}"
+    vendor: "{{ .Env.PKG_MAINTAINER_NAME }}"
+    homepage: "{{ .Env.PKG_HOMEPAGE }}"
+    maintainer: "{{ .Env.PKG_MAINTAINER_NAME }} <{{ .Env.PKG_MAINTAINER_EMAIL }}>"
+    description: "{{ .Env.PKG_DESCRIPTION }}"
+    license: "{{ .Env.PKG_LICENSE }}"
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/bin
+    contents:
+      - src: contrib/man/shedoc.1
+        dst: /usr/share/man/man1/shedoc.1
+      - src: contrib/completions/bash/shedoc.bash
+        dst: /usr/share/bash-completion/completions/shedoc
+      - src: contrib/completions/zsh/shedoc.zsh
+        dst: /usr/share/zsh/vendor-completions/_shedoc
+      - src: contrib/completions/fish/shedoc.fish
+        dst: /usr/share/fish/vendor_completions.d/shedoc.fish
+
+checksum:
+  algorithm: sha256
+
+report_sizes: true
+
+changelog:
+  disable: true # release notes handled via git-cliff (see release.header)
+
+release:
+  draft: false
+  prerelease: auto
+  make_latest: true
+  mode: replace
+  header: |
+    {{- if .Env.GIT_CLIFF_RELEASE_NOTES }}
+    {{ .Env.GIT_CLIFF_RELEASE_NOTES }}
+    {{- else -}}
+    WARNING: git-cliff release notes missing -- rerun via `make release`.
+    {{- end }}

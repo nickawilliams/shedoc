@@ -1,2 +1,4 @@
-deps
-dist
+.cache
+.out
+.claude
+contrib/

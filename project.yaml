@@ -1,0 +1,7 @@
+binary: shedoc
+description: Extract structured documentation from shell scripts
+homepage: https://github.com/nickawilliams/shedoc
+license: BSD-3-Clause
+maintainer:
+  name: Nick Williams
+  email: nickawilliams@users.noreply.github.com
