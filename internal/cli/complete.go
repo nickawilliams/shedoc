@@ -106,7 +106,7 @@ func runCompleteHandler(w io.Writer, scriptPath, shell string) error {
 
 	compPoint := len(compLine)
 	if cp := os.Getenv("COMP_POINT"); cp != "" {
-		fmt.Sscanf(cp, "%d", &compPoint)
+		_, _ = fmt.Sscanf(cp, "%d", &compPoint)
 	}
 
 	doc, err := shedoc.Parse(scriptPath)
@@ -194,9 +194,9 @@ func completionCandidates(doc *shedoc.Document, compLine string, compPoint int) 
 	prevWord := ""
 	if len(words) > 0 {
 		prevWord = words[len(words)-1]
-	} else if !endsWithSpace && curWord != "" {
-		// curWord is actually part of words, prevWord stays empty
 	}
+	// When !endsWithSpace && curWord != "", curWord is part of words
+	// and prevWord stays empty — no special handling needed.
 
 	if prevWord != "" && isValueOption(prevWord, cmdBlock, matchedSub) {
 		return nil

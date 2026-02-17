@@ -301,7 +301,9 @@ func TestRunCompleteSetup_FallbackName(t *testing.T) {
 	// Create a temp script with no #?/name
 	tmpDir := t.TempDir()
 	scriptPath := filepath.Join(tmpDir, "my-tool.sh")
-	os.WriteFile(scriptPath, []byte("#!/bin/bash\n#@/command\n # @flag --help Show help\n ##\n"), 0o644)
+	if err := os.WriteFile(scriptPath, []byte("#!/bin/bash\n#@/command\n # @flag --help Show help\n ##\n"), 0o644); err != nil {
+		t.Fatalf("failed to write test script: %v", err)
+	}
 
 	var buf bytes.Buffer
 	err := runCompleteSetup(&buf, scriptPath, "bash")

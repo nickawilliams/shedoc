@@ -456,7 +456,7 @@ func TestCLI_Stdin(t *testing.T) {
 
 	input := "#!/bin/bash\n#?/name stdin-test\n#?/version 0.1.0\n"
 	go func() {
-		w.WriteString(input)
+		_, _ = w.WriteString(input)
 		w.Close()
 	}()
 
