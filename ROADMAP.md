@@ -2,7 +2,7 @@
 
 ## Specification
 
-Features under consideration for future versions of the spec.
+Features under consideration for future versions of the [spec](SPEC.md).
 
 ### v2 Candidates
 
