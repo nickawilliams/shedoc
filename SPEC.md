@@ -1,4 +1,4 @@
-# Shedoc Specification
+# Shedoc Specification `v1.0.0`
 
 Shedoc is a documentation standard for shell scripts, extending the familiar shebang pattern
 with two additional sigils for structured documentation. It is descriptive, not prescriptive —
