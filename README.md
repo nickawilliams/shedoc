@@ -52,7 +52,7 @@ shedoc a.sh b.sh                        # multiple files → NDJSON
 | Flag | Description |
 | --- | --- |
 | `-t, --to <format>` | Output format (`json`, `help`, `man`, `completion:bash`, `completion:zsh`, `completion:fish`) |
-| `-g, --get <tag>` | Extract a single `#?/` tag value as plain text |
+| `-g, --get <path>` | Extract a single `#?/` path value as plain text |
 | `-o, --output <path>` | Write output to file instead of stdout |
 | `-w, --warnings` | Include warnings in JSON output |
 | `-q, --quiet` | Suppress warnings on stderr |

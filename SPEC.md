@@ -31,11 +31,15 @@ Multi-line documentation uses indented continuation lines:
 - **Continue:** `␣#␣` (space, hash, space)
 - **Close:** `␣##` (space, double hash)
 
-Single-line shedocs need no closing:
+Single-line forms need no closing. Text after the sigil and optional path is the
+description:
 
 ```bash
 #?/name my-script
 #?/version 1.0.0
+#@ A minimal helper function
+#@/private Validate user input
+#@/command/push Deploy to production
 ```
 
 ## Shedoc Paths (`#?/`)
@@ -58,30 +62,29 @@ Any shedoc path can use the block form for multi-line content.
 
 ## Sheblock Paths (`#@/`)
 
-| Path                   | Meaning                                        |
-| ---------------------- | ---------------------------------------------- |
-| `#@/command`           | CLI command (function or script)               |
-| `#@/subcommand <name>` | Subcommand (function invoked via command name) |
-| `#@/public`            | Public function, available when sourced        |
-| `#@/private`           | Internal function, not part of public API      |
-| `#@/`                  | Bare (no visibility) defaults to public        |
+| Path                    | Visibility | Meaning                                       |
+| ----------------------- | ---------- | --------------------------------------------- |
+| `#@`                    | public     | No path defaults to public                    |
+| `#@/public`             | public     | Public function, available when sourced       |
+| `#@/private`            | private    | Internal function, not part of public API     |
+| `#@/command`            | public     | CLI command (root entry point)                |
+| `#@/command/<name...>`  | public     | Subcommand (path mirrors invocation hierarchy)|
 
 ### Command Behavior
 
-`#@/command` can document:
+`#@/command` documents the root CLI entry point. It can document:
 
 1. **A function** — when immediately followed by a function declaration
 2. **The script itself** — when standalone (no function follows)
 
-A file typically has one `#@/command` block.
+A file typically has one `#@/command` block. Subcommands are expressed as deeper paths
+under `#@/command/` — for example, `#@/command/push` or `#@/command/compose/up`. The
+path mirrors the invocation hierarchy: `deploy push` → `#@/command/push`.
 
-### Subcommand Behavior
-
-`#@/subcommand <name>` documents a subcommand. The `<name>` is what users type; the
-function name can be anything. Common flags shared by all subcommands can be
-documented in the `#@/command` block. When `#@/subcommand` blocks are present, the
-available subcommands can be inferred — an explicit `@operand <command>` in the
-`#@/command` block is optional.
+The subcommand name in the path is what users type; the function name can be anything.
+Common flags shared by all subcommands can be documented in the `#@/command` block.
+When subcommand paths are present, the available subcommands can be inferred — an
+explicit `@operand <command>` in the `#@/command` block is optional.
 
 ## Block Tags (`@`)
 
@@ -200,7 +203,7 @@ main() {
     esac
 }
 
-#@/subcommand push
+#@/command/push
  # Deploys the application to the specified environment.
  #
  # @flag    -f | --force             Skip confirmation prompt
@@ -221,7 +224,7 @@ cmd_push() {
     # implementation
 }
 
-#@/subcommand status
+#@/command/status
  # Shows the current deployment status for an environment.
  #
  # @option  --format [fmt=text]      Output format (text, json, yaml)
@@ -235,7 +238,7 @@ cmd_status() {
     # implementation
 }
 
-#@/subcommand rollback
+#@/command/rollback
  # Rolls back to the previous deployment.
  #
  # @flag    -f | --force             Skip confirmation prompt
@@ -254,7 +257,7 @@ cmd_rollback() {
     # implementation
 }
 
-#@/subcommand migrate
+#@/command/migrate
  # @deprecated Use 'deploy push --migrate' instead.
  ##
 cmd_migrate() {
