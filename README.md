@@ -15,8 +15,10 @@ documentation directly in shell scripts.
  # Prints a greeting message.
  #
  # @operand [name=World]   Name to greet
- # @exit    0               Success
+ #
  # @stdout                  Greeting message
+ #
+ # @exit    0               Success
  ##
 
 echo "Hello, ${1:-World}!"

@@ -156,10 +156,12 @@ A CLI tool with subcommands, demonstrating most Shedoc features:
 #?/section  1
 #?/author   Jane Developer
 #?/license  MIT
+
 #?/description
  # A deployment tool for managing application releases. Supports
  # multiple environments and rollback capabilities.
  ##
+
 #?/examples
  # deploy status production
  # deploy push --force staging
@@ -169,19 +171,21 @@ A CLI tool with subcommands, demonstrating most Shedoc features:
 #@/command
  # Manages application deployments across environments.
  #
+ # @env     DEPLOY_TOKEN            Authentication token for the deployment
+ #                                  service. Can also be provided via the
+ #                                  .deployrc configuration file.
+ #
  # @flag    -v | --verbose          Enable verbose output
  # @option  -c | --config <path>    Path to configuration file
  # @operand <command>               Subcommand to run
  #
- # @env     DEPLOY_TOKEN            Authentication token for the deployment
- #                                  service. Can also be provided via the
- #                                  .deployrc configuration file.
  # @reads   ~/.deployrc             User configuration
+ #
+ # @stderr                          Error and diagnostic messages
  #
  # @exit    0                       Success
  # @exit    1                       General error
  # @exit    2                       Authentication failure
- # @stderr                          Error and diagnostic messages
  ##
 main() {
     # top-level flag parsing ...
@@ -204,12 +208,13 @@ main() {
  # @operand <environment>            Target environment (production, staging)
  # @operand [services...]            Specific services to deploy
  #
+ # @writes  /var/log/deploy.log      Deployment log
+ #
  # @stdin                            Reads version from STDIN if provided
+ # @stdout                           Deployment progress
  #
  # @exit    0                        Success
  # @exit    1                        Deploy failed
- # @stdout                           Deployment progress
- # @writes  /var/log/deploy.log      Deployment log
  ##
 cmd_push() {
     # implementation
@@ -221,8 +226,9 @@ cmd_push() {
  # @option  --format [fmt=text]      Output format (text, json, yaml)
  # @operand <environment>            Target environment
  #
- # @exit    0                        Success
  # @stdout                           Status information
+ #
+ # @exit    0                        Success
  ##
 cmd_status() {
     # implementation
@@ -235,12 +241,13 @@ cmd_status() {
  # @operand <environment>            Target environment
  # @operand [version]                Specific version to roll back to
  #
- # @sets    DEPLOY_LAST_ROLLBACK     Timestamp of last rollback
  # @writes  /var/log/deploy.log      Rollback log entry
+ # @sets    DEPLOY_LAST_ROLLBACK     Timestamp of last rollback
+ #
+ # @stdout                           Rollback progress
  #
  # @exit    0                        Success
  # @exit    1                        Rollback failed
- # @stdout                           Rollback progress
  ##
 cmd_rollback() {
     # implementation
@@ -270,8 +277,10 @@ When `#@/command` has no function following it, it documents the script's inline
  # Prints a greeting message.
  #
  # @operand [name=World]              Name to greet
- # @exit    0                         Success
+ #
  # @stdout                            Greeting message
+ #
+ # @exit    0                         Success
  ##
 
 echo "Hello, ${1:-World}!"
@@ -286,6 +295,7 @@ When the script is meant to be sourced, use `#@/public` and `#@/private`:
 
 #?/name        string-utils
 #?/version     1.0.0
+
 #?/description
  # A library of string manipulation functions.
  ##
