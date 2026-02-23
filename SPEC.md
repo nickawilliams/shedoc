@@ -13,20 +13,21 @@ opinions on structure or style.
 | `#?/` | Shedoc   | File metadata (name, version, synopsis)      |
 | `#@/` | Sheblock | Code documentation (functions, entry points) |
 
-The `/` begins a reference — filesystem path for shebangs, documentation tag for shedocs.
+Each sigil is followed by a **path**. For shebangs, the path names an interpreter. For
+shedocs, the path names a metadata field. For sheblocks, the path indicates visibility.
 
 ## Block Syntax
 
 Multi-line documentation uses indented continuation lines:
 
 ```bash
-#@/visibility
+#@/public
  # Description line
  # @tag value
  ##
 ```
 
-- **Open:** `#?/tag` or `#@/visibility`
+- **Open:** `#?/name` or `#@/public` (sigil followed by path)
 - **Continue:** `␣#␣` (space, hash, space)
 - **Close:** `␣##` (space, double hash)
 
@@ -37,12 +38,12 @@ Single-line shedocs need no closing:
 #?/version 1.0.0
 ```
 
-## Shedoc Tags (`#?/`)
+## Shedoc Paths (`#?/`)
 
-File-level metadata for man pages and help output. All tags are optional, though tooling
-(e.g., man page generation) may require specific tags.
+File-level metadata for man pages and help output. All paths are optional, though tooling
+(e.g., man page generation) may require specific paths.
 
-| Tag              | Description                       |
+| Path             | Description                       |
 | ---------------- | --------------------------------- |
 | `#?/name`        | Script name and brief description |
 | `#?/version`     | Version string                    |
@@ -53,11 +54,11 @@ File-level metadata for man pages and help output. All tags are optional, though
 | `#?/author`      | Author name                       |
 | `#?/license`     | License identifier                |
 
-Any shedoc tag can use the block form for multi-line content.
+Any shedoc path can use the block form for multi-line content.
 
-## Sheblock Visibility (`#@/`)
+## Sheblock Paths (`#@/`)
 
-| Visibility             | Meaning                                        |
+| Path                   | Meaning                                        |
 | ---------------------- | ---------------------------------------------- |
 | `#@/command`           | CLI command (function or script)               |
 | `#@/subcommand <name>` | Subcommand (function invoked via command name) |
